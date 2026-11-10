@@ -368,10 +368,21 @@ Optionnel : brancher les événements du widget sur GA4 via `CONFIG.SUIVI` (exem
 
 Format : `https://gite.hourdeau.com/?utm_source=<source>&utm_medium=<support>&utm_campaign=<campagne>`
 
-| Lien | `utm_source` | `utm_medium` | `utm_campaign` |
-|---|---|---|---|
-| Article LinkedIn | `linkedin` | `article` | `lancement_site` |
-| Post LinkedIn | `linkedin` | `post` | `lancement_site` |
+| Où | utm_source | utm_medium | utm_campaign | URL complète |
+|---|---|---|---|---|
+| Signature mail | `outlook` | `email` | `signature` | `https://gite.hourdeau.com/?utm_source=outlook&utm_medium=email&utm_campaign=signature` |
+| Fiche d'établissement Google | `google` | `local` | `fiche` | `https://gite.hourdeau.com/?utm_source=google&utm_medium=local&utm_campaign=fiche` |
+| CV DoYouBuzz | `doyoubuzz` | `referral` | `cv` | `https://gite.hourdeau.com/?utm_source=doyoubuzz&utm_medium=referral&utm_campaign=cv` |
+| Page LinkedIn Chez Marcel | `linkedin` | `social` | `page` | `https://gite.hourdeau.com/?utm_source=linkedin&utm_medium=social&utm_campaign=page` |
+| Profil LinkedIn perso | `linkedin` | `social` | `profil` | `https://gite.hourdeau.com/?utm_source=linkedin&utm_medium=social&utm_campaign=profil` |
+| Article LinkedIn (lancement du site) | `linkedin` | `article` | `lancement_site` | `https://gite.hourdeau.com/?utm_source=linkedin&utm_medium=article&utm_campaign=lancement_site` |
+| Post LinkedIn (annonce de l'article) | `linkedin` | `post` | `lancement_site` | `https://gite.hourdeau.com/?utm_source=linkedin&utm_medium=post&utm_campaign=lancement_site` |
+| Instagram (lien en bio) | `instagram` | `social` | `profil` | `https://gite.hourdeau.com/?utm_source=instagram&utm_medium=social&utm_campaign=profil` |
+| Facebook | `facebook` | `social` | `profil` | `https://gite.hourdeau.com/?utm_source=facebook&utm_medium=social&utm_campaign=profil` |
+| ESPRIT (Tourinsoft) | `esprit` | `referral` | `fiche` | `https://gite.hourdeau.com/?utm_source=esprit&utm_medium=referral&utm_campaign=fiche` |
+| Chaîne YouTube (en-tête, section Liens) | `youtube` | `social` | `chaine` | `https://gite.hourdeau.com/?utm_source=youtube&utm_medium=social&utm_campaign=chaine` |
+| Vidéo YouTube (description) | `youtube` | `social` | `video-<nom-de-la-video>` | `https://gite.hourdeau.com/?utm_source=youtube&utm_medium=social&utm_campaign=video-visite-gite` |
+| Google Ads | marquage automatique (`gclid`) | | | Aucun UTM : compte Ads lié à la propriété GA4, marquage automatique activé |
 
 ⚠ Inutile de taguer les liens Google Ads si l'auto-tagging (`gclid`) est actif et le compte Ads lié à GA4.
 
