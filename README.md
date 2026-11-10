@@ -115,8 +115,7 @@ dig CNAME gite.hourdeau.com +short
 
 Offre gratuite Odoo Online : **une seule application**, utilisateurs illimités, hébergement et maintenance inclus. Application installée : **Site Web**.
 
-> Ne pas installer de deuxième application : selon les conditions d'Odoo, la base sort alors de l'offre gratuite. ⚠ À vérifier dans les conditions en vigueur avant toute installation.
-
+> Ne pas installer de deuxième application : selon les conditions d'Odoo, la base sort alors de l'offre gratuite.
 ### 5.2 Domaine personnalisé
 
 Dans les paramètres du site Web, domaine déclaré : `https://gite.hourdeau.com`. L'adresse technique `https://gite-hourdeau.odoo.com` reste accessible. Elle figure donc dans la liste des origines autorisées du Worker.
@@ -130,13 +129,11 @@ Dans les paramètres du site Web, domaine déclaré : `https://gite.hourdeau.com
 | Espagnol | `es_ES` | `/es/` | Interface en français, réponse dans la langue du visiteur |
 | Italien | `it_IT` | `/it/` | Interface en français, réponse dans la langue du visiteur |
 
-⚠ À vérifier : les codes de langue exacts (`en_GB` ou `en_US`, etc.) dans Paramètres > Langues.
-
 Méthode de traduction : outil de traduction automatique d'Odoo, puis **relecture humaine** de chaque page. Toute modification d'un contenu français doit être reportée dans les trois autres langues : Odoo ne propage pas les modifications aux traductions existantes.
 
 ### 5.4 Injection de code
 
-Odoo permet d'injecter du code personnalisé dans le `<head>` et en fin de `<body>` de toutes les pages. ⚠ À vérifier : le chemin exact du menu selon la version d'Odoo (éditeur de site, onglet Thème, section avancée).
+Odoo permet d'injecter du code personnalisé dans le `<head>` et en fin de `<body>` de toutes les pages.
 
 | Emplacement | Contenu |
 |---|---|
@@ -376,7 +373,7 @@ Format : `https://gite.hourdeau.com/?utm_source=<source>&utm_medium=<support>&ut
 | Article LinkedIn | `linkedin` | `article` | `lancement_site` |
 | Post LinkedIn | `linkedin` | `post` | `lancement_site` |
 
-⚠ À compléter avec les tags réellement utilisés pour la fiche Google, ESPRIT, YouTube, la signature e-mail et les réseaux sociaux. Règles : minuscules, pas d'espaces, une valeur stable par canal. Inutile de taguer les liens Google Ads si l'auto-tagging (`gclid`) est actif et le compte Ads lié à GA4.
+⚠ Inutile de taguer les liens Google Ads si l'auto-tagging (`gclid`) est actif et le compte Ads lié à GA4.
 
 ---
 
