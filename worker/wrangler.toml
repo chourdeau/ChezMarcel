@@ -1,0 +1,19 @@
+name = "marcel-proxy"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Limitation de débit : 10 requêtes par minute et par adresse IP
+# (compteur local à chaque point de présence Cloudflare)
+[[ratelimits]]
+name = "LIMITEUR"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60
+
+[observability]
+enabled = true
+
+# Secret requis (jamais dans ce fichier) :
+#   npx wrangler secret put GROQ_API_KEY
