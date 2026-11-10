@@ -350,7 +350,9 @@ Installation retenue : **champ natif d'Odoo** (ID de mesure `G-…` dans les par
 
 Vérification : GA4 > Rapports > Temps réel, ouvrir une page : un seul `page_view` doit remonter. L'extension Tag Assistant de Google montre aussi le nombre de balises chargées.
 
-⚠ À vérifier : consentement aux cookies (RGPD). GA4 dépose des cookies de mesure qui nécessitent le consentement préalable du visiteur. Vérifier que la bannière de cookies d'Odoo est activée et que la balise GA4 native ne se déclenche qu'après acceptation.
+Consentement aux cookies (RGPD). GA4 dépose des cookies de mesure qui nécessitent le consentement préalable du visiteur. 
+Bannière de cookies d'Odoo est activée, la balise GA4 native ne se déclenche qu'après acceptation.
+La barre de cookies s’active dans Site Web > Configuration > Paramètres, option Cookies Bar de la section Confidentialité. La page de politique de cookies (/cookie-policy) est alors créée automatiquement. Odoo indique être compatible avec le Consent Mode v2 de Google
 
 Optionnel : brancher les événements du widget sur GA4 via `CONFIG.SUIVI` (exemple fourni en commentaire dans le fichier). Événements disponibles : `ouverture`, `message`, `effacement`, `erreur`, `teaser`.
 
@@ -467,21 +469,16 @@ Toute modification du widget ou du Worker est commitée dans ce dépôt **après
 **⚠ À vérifier**
 
 - [ ] Méthode de validation Search Console ([9.1](#91-google-search-console))
-- [ ] Suppression du doublon GA4 en code personnalisé ([9.2](#92-google-analytics-4))
-- [ ] Consentement cookies et déclenchement de GA4 ([9.2](#92-google-analytics-4))
 - [ ] Mécanisme et fréquence de synchronisation ResaNight / Airbnb ([6.1](#61-resanight))
-- [ ] Codes de langue Odoo ([5.3](#53-multilingue))
 - [ ] Chemin du menu d'injection de code selon la version d'Odoo ([5.4](#54-injection-de-code))
-- [ ] Conditions de l'offre gratuite Odoo en cas d'ajout d'application ([5.1](#51-offre))
-- [ ] Tags UTM existants à recenser ([9.4](#94-convention-utm))
-
 ---
 
 ## 13. Feuille de route
 
 1. **Prompt côté serveur.** Déplacer `PROFIL` et `construirePrompt()` dans le Worker. Le navigateur n'enverrait plus que l'historique et la langue. Un détournement du proxy ne produirait que des réponses sur le gîte. Contrepartie : mise à jour du profil par `wrangler deploy` au lieu d'Odoo.
 2. **Mesure du chat.** Brancher `CONFIG.SUIVI` sur GA4.
-3. **Cloudflare en frontal.** Déléguer la zone `hourdeau.com` à Cloudflare (offre gratuite : CDN, protection DDoS, pare-feu applicatif). ⚠ Compatibilité à valider : sur Odoo Online, c'est Odoo qui gère le domaine personnalisé et le certificat. Configuration déjà éprouvée par ailleurs devant une instance Odoo 19 Community auto-hébergée, mais le contexte n'est pas transposable tel quel. Impact sur l'ensemble des enregistrements de la zone à évaluer.
+3. **Cloudflare en frontal.** Déléguer la zone `hourdeau.com` à Cloudflare (offre gratuite : CDN, protection DDoS, pare-feu applicatif). 
+⚠ Compatibilité à valider : sur Odoo Online, c'est Odoo qui gère le domaine personnalisé et le certificat. Configuration déjà éprouvée par ailleurs devant une instance Odoo 19 Community auto-hébergée, mais le contexte n'est pas transposable tel quel. Impact sur l'ensemble des enregistrements de la zone à évaluer.
 4. **Chat en espagnol et italien.**
 5. **Réplication** de l'architecture pour un autre site associatif sur Odoo.
 
