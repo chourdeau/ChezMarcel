@@ -5,7 +5,7 @@
   /* ═══ 1. CONFIGURATION TECHNIQUE ═══ */
   var CONFIG = {
     // API
-    GROQ_API_KEY: "",              // ⚠ Colle ici une NOUVELLE clé (révoque l'ancienne). Visible des visiteurs : idéalement, passe par un proxy (ENDPOINT) et laisse ce champ vide.
+    GROQ_API_KEY: "",              // Vide : la clé est gardée côté serveur par le proxy (ENDPOINT).
     ENDPOINT: "https://marcel-proxy.hourdeau.workers.dev",
     MODEL: "openai/gpt-oss-120b",
     TEMPERATURE: 0.4,
@@ -24,7 +24,7 @@
     COULEUR_FOND: "#F3F6F5",       // fond de la zone de conversation
     POSITION: "droite",            // "droite" | "gauche"
     MARGE_X: 20,                   // distance au bord latéral (px)
-    VERTICAL: "bas",              // "haut" | "bas" : bouton en haut ou en bas de l'écran
+    VERTICAL: "bas",               // "haut" | "bas" : bouton en haut ou en bas de l'écran
     MARGE_Y: 20,                   // distance au bord haut (ou bas) de l'écran (px). En haut : prévoir la hauteur du menu du site.
     LARGEUR: 370,
     HAUTEUR: 540,
@@ -40,6 +40,7 @@
     PAGES_EXCLUES: ["/web", "/odoo"], // préfixes d'URL où le widget ne s'affiche pas (back-office Odoo)
     MASQUER_DANS_IFRAME: false,    // true = masqué quand le site est affiché dans une iframe. ⚠ Connecté à Odoo, le site s'affiche en iframe : le widget disparaît pour toi.
     LIEN_CONTACT: "https://airbnb.fr/h/epaud", // lien "Annonce Airbnb" en pied de chat ("" = masqué)
+    SITE: "https://gite.hourdeau.com",         // sert à construire les liens des pages légales dans la langue du visiteur
 
     // Suivi d'audience (optionnel) : fonction appelée sur ouverture, message, effacement, erreur, teaser
     // Exemple Matomo : SUIVI: function (evt, info) { window._paq && _paq.push(["trackEvent", "Marcel", evt, info]); }
@@ -56,10 +57,15 @@
   var ancienWidget = document.getElementById("assistant-gite-host");
   if (ancienWidget) ancienWidget.remove();   // retire le widget monté par une ancienne copie du script (pied de page traduit)
 
-  /* Langue de la page : Odoo renseigne <html lang="fr-FR"> ou "en-GB". Repli sur le préfixe d'URL /en/ */
-  var langHtml = (document.documentElement.lang || "").toLowerCase();
-  var LANG = langHtml ? (langHtml.indexOf("en") === 0 ? "en" : "fr")
-                      : (/^\/en(\/|$)/.test(location.pathname) ? "en" : "fr");
+  /* Langue de la page : Odoo renseigne <html lang="fr-FR">, "en-GB", "it-IT", "es-AR"...
+     Repli sur le préfixe d'URL (/en/, /it/, /es/), puis sur le français. */
+  var LANGUES = ["fr", "en", "it", "es"];
+  var langHtml = (document.documentElement.lang || "").toLowerCase().slice(0, 2);
+  var langUrl = (location.pathname.match(/^\/(en|it|es)(\/|$)/) || [])[1];
+  var LANG = LANGUES.indexOf(langHtml) >= 0 ? langHtml : (langUrl || "fr");
+
+  /* Lien vers une page du site dans la langue du visiteur (ex. /it/cookie-policy) */
+  function lienSite(page) { return CONFIG.SITE + (LANG === "fr" ? "" : "/" + LANG) + page; }
 
   /* ═══ 2. PROFIL DU GÎTE ═══ */
   var PROFIL = {
@@ -70,11 +76,15 @@
       initiale: "M",
       sousTitre: {
         fr: "Votre guide au gîte Chez Marcel",
-        en: "Your guide to the Chez Marcel gîte"
+        en: "Your guide to the Chez Marcel gîte",
+        it: "La sua guida al gîte Chez Marcel",
+        es: "Su guía en el gîte Chez Marcel"
       },
       messageAccueil: {
         fr: "Bonjour, moi c'est Marcel ! Je réponds à vos questions sur la réservation, l'arrivée, le logement et les environs (Puy du Fou compris). Que souhaitez-vous savoir ?",
-        en: "Hello, I'm Marcel! I can answer your questions about booking, arrival, the accommodation and the surrounding area (Puy du Fou included). What would you like to know?"
+        en: "Hello, I'm Marcel! I can answer your questions about booking, arrival, the accommodation and the surrounding area (Puy du Fou included). What would you like to know?",
+        it: "Buongiorno, sono Marcel! Rispondo alle sue domande su prenotazione, arrivo, alloggio e dintorni (Puy du Fou compreso). Cosa desidera sapere?",
+        es: "¡Hola, soy Marcel! Respondo a sus preguntas sobre la reserva, la llegada, el alojamiento y los alrededores (Puy du Fou incluido). ¿Qué desea saber?"
       },
       ton: "chaleureux, simple et précis, avec un vouvoiement poli, une pointe de bonhomie vendéenne sans en faire trop, un excellent sens de l'accueil",
       langueParDefaut: "français"
@@ -133,8 +143,8 @@
       tarifs: "",               // À COMPLÉTER : tarif par nuit, supplément par personne, etc.
       taxeDeSejour: "5,00 % plus la taxe additionnelle départementale de 10,00 %. Détail du calcul : https://paysdepouzauges.taxesejour.fr/#simulateur",
       menage: "",               // À COMPLÉTER : frais de ménage
-      caution: "",              // À COMPLÉTER
-      annulation: "",           // À COMPLÉTER : politique d'annulation
+      caution: "",              // À COMPLÉTER (les CGV, section INFORMATIONS LEGALES, indiquent : aucun dépôt de garantie pour une réservation sur le site)
+      annulation: "",           // À COMPLÉTER (les CGV couvrent l'annulation pour une réservation sur le site)
       modification: "",         // À COMPLÉTER
       groupesEtSalaries: ""     // À COMPLÉTER : accueil de salariés en déplacement, facture au nom d'une entreprise, etc.
     },
@@ -200,7 +210,7 @@
         "À moins de 10 minutes du Parc du Puy du Fou (Les Epesses), par le « bon côté » de l'entrée du parc, à l'opposé de l'A87.",
         "Le parc propose une vingtaine de grands spectacles, quatre villages d'époque, pas de manèges.",
         "Sur une journée au parc, vous parcourez bien en moyenne 10 kilomètres à pied",
-	"Vous pouvez tout à fait sortir du parc en fin de journée pour revenir au gîte, dîner, se reposer puis repartir à un spectacle nocturne",
+        "Vous pouvez tout à fait sortir du parc en fin de journée pour revenir au gîte, dîner, se reposer puis repartir à un spectacle nocturne",
         "Cinéscénie : grand spectacle nocturne, se termine tard, réservation obligatoire. Noces de Feu : spectacle plus court de 30 minutes sur le lac, chaque soir à la tombée de la nuit.",
         "Saison 2027 : ouverture de la billetterie le mardi 6 octobre 2026. Billets (Parc, Cinéscénie) auprès de l'Office de Tourisme du Pays de Pouzauges : https://www.tourisme-paysdepouzauges.fr/",
         "Attention aux offres Parc + Hôtel qui peuvent loger à Cholet (25 km du parc) ou aux Herbiers (10-15 km).",
@@ -222,13 +232,13 @@
         "Châteaux forts de Pouzauges, de Saint-Mesmin et des Châteliers-Châteaumur",
         "Bords de la Sèvre Nantaise",
         "Manoir des sciences de Réaumur : https://manoirdessciencesdereaumur.fr/",
-	"Tombeau de George Clémenceau sur la commune de Mouchamps"
+        "Tombeau de George Clémenceau sur la commune de Mouchamps"
       ],
       guideTouristique: "Guide touristique Airbnb préparé par l'hôte : https://www.airbnb.fr/s/guidebooks?refinement_paths%5B%5D=%2Fguidebooks%2F4559585&s=67&unique_share_id=b21997c7-adef-4e8d-bbcc-614d7400b143",
       youtube: "Chaîne YouTube du gîte (visite et vidéos des alentours) : https://www.youtube.com/@GîteChezMarcel",
-      restaurants: "Les jardins du Lavoir ou La Fine Bouche aux Herbiers, l'Auberge du Mont Mercure, Le Relais Saint Michel, L'Auberge de Poupet",          // À COMPLÉTER
-      commerces: "boulangerie, superette Vival, salon de coiffure, bar-tabac à Saint Michel Mont Mercure à 2 km, distributeur de billets à la Flocellière à 3 km ",            // À COMPLÉTER : 
-      sante: "pharmacie à St Michel Mont Mercure, urgence à Cholet à 20 minutes",                
+      restaurants: "Les jardins du Lavoir ou La Fine Bouche aux Herbiers, l'Auberge du Mont Mercure, Le Relais Saint Michel, L'Auberge de Poupet",
+      commerces: "boulangerie, superette Vival, salon de coiffure, bar-tabac à Saint Michel Mont Mercure à 2 km, distributeur de billets à la Flocellière à 3 km ",
+      sante: "pharmacie à St Michel Mont Mercure, urgence à Cholet à 20 minutes",
       activitesEnfants: "",     // À COMPLÉTER
       randonneesVelo: "",       // À COMPLÉTER : circuits au départ du gîte
       evenements: ""            // À COMPLÉTER : fêtes locales, marchés, événements saisonniers
@@ -246,6 +256,50 @@
       disponibilite: "En semaine : entre 13h00 et 14h00 ou après 18h00. Le week-end : de 9h00 à 18h00."
     },
 
+    // Informations légales (résumé fidèle des pages du site, novembre 2026). Les pages officielles font foi.
+    informationsLegales: {
+      perimetre: "Les CGV ci-dessous s'appliquent UNIQUEMENT aux réservations faites directement sur le site gite.hourdeau.com (module ResaNight). Une réservation faite sur Airbnb reste régie par les conditions d'Airbnb (annulation, paiement, remboursement).",
+      pages: [
+        "Mentions légales : " + lienSite("/mentions-l%C3%A9gales"),
+        "Conditions générales de vente et d'utilisation (CGV) : " + lienSite("/conditions-g%C3%A9n%C3%A9rales-de-vente-et-d-utilisation"),
+        "Politique relative aux cookies : " + lienSite("/cookie-policy")
+      ],
+      mentionsLegales: [
+        "Éditeur du site : HOURDEAU (Cédric Hourdeau, loueur en meublé non professionnel), immatriculé au Registre National des Entreprises (RNE) sous le numéro 101 464 519, SIRET 101 464 519 00001. Siège : 4 rue des Couturières, 85700 Sèvremont.",
+        "Direction de la publication, conception et webmastering du site : Cédric Hourdeau.",
+        "Hébergement : plateforme Odoo Online, hébergée par OVH SAS, 2 rue Kellermann, 59100 Roubaix (RCS Lille 537 407 926).",
+        "Module de réservation : ResaNight, prestataire technique hébergé chez Cloudflare en Irlande (UE). ResaNight n'est pas partie au contrat de location. Ses mentions légales : https://www.resanight.com/mentions-legales",
+        "Déclaration du meublé de tourisme déposée en mairie de Sèvremont."
+      ],
+      cgv: [
+        "Prix en euros, TVA non applicable (article 261 D 4° du CGI). Le prix applicable est celui du récapitulatif au moment de la réservation. Une modification de tarif ne s'applique jamais à une réservation déjà confirmée.",
+        "Taxe de séjour : collectée par le propriétaire, détaillée dans le récapitulatif et payée en ligne avec la réservation. Les voyageurs mineurs et les personnes exonérées par la loi n'y sont pas assujettis. Elle n'est due que pour les nuits effectivement passées au gîte.",
+        "Réservation en ligne : choix des dates sur le calendrier, récapitulatif (nuitées, taxe de séjour, total), saisie des coordonnées et du nombre d'adultes, enfants et bébés, acceptation de la politique de confidentialité, clic sur « Réserver et payer » qui vaut commande avec obligation de paiement, puis paiement en ligne. Le contrat est formé à la confirmation du paiement et une confirmation est envoyée par e-mail. Le client doit être majeur. Le nombre de voyageurs déclaré engage le client.",
+        "Paiement : totalité du séjour, taxe de séjour comprise, payée à la réservation par carte bancaire, via le prestataire sécurisé Stripe. Le propriétaire n'a jamais accès aux données bancaires. Aucun dépôt de garantie n'est demandé. Facture sur simple demande.",
+        "Droit de rétractation : il ne s'applique pas aux prestations d'hébergement à date déterminée (article L.221-28, 12° du Code de la consommation). L'annulation reste possible selon les conditions ci-dessous.",
+        "Annulation par le client : par e-mail à gite@hourdeau.com, la date de réception fait foi. Au moins 5 jours avant le jour d'arrivée : remboursement intégral. Moins de 5 jours avant le jour d'arrivée : remboursement de 50 % du prix de l'hébergement. Non-présentation sans annulation : aucun remboursement du prix de l'hébergement. La taxe de séjour des nuits non effectuées est toujours remboursée. Départ anticipé : les nuits non effectuées ne sont pas remboursées, hors taxe de séjour. Remboursement sur la carte utilisée, sous 14 jours maximum.",
+        "Modification par le client : demande par e-mail, acceptée selon les disponibilités et au tarif en vigueur. Une modification qui réduit la durée du séjour est traitée comme une annulation partielle.",
+        "Annulation par le propriétaire : il prévient le client sans délai et rembourse l'intégralité des sommes sous 14 jours, sans priver le client d'une éventuelle réparation, sauf force majeure. En cas de force majeure (article 1218 du Code civil), les sommes versées pour un séjour rendu impossible sont remboursées.",
+        "Durée : location saisonnière meublée de 90 jours consécutifs maximum. Le gîte ne peut pas devenir la résidence principale des voyageurs. Aucun droit au maintien dans les lieux en fin de séjour.",
+        "Séjour : arrivée à partir de 16h, départ avant 10h, arrivée autonome, prévenir le propriétaire de tout retard. Le nombre de voyageurs ne peut dépasser ni la capacité (5 personnes) ni le nombre déclaré, sinon l'accès peut être refusé. Animaux non acceptés, logement non-fumeur, fêtes et événements non acceptés. Le client répond des dégradations et est invité à vérifier que son assurance responsabilité civile couvre la location de vacances.",
+        "État des lieux : établi et signé à l'arrivée et au départ pour un séjour de plus de 30 nuits. Pour 30 nuits ou moins, pas d'état des lieux : le client signale toute anomalie dans les 24 heures suivant son arrivée, par e-mail ou message, avec photos si possible.",
+        "Clientèle professionnelle : le client qui réserve pour une entreprise déclare pouvoir l'engager. Facture au nom de l'entreprise sur demande (raison sociale, adresse et SIREN à fournir au plus tard à la fin du séjour). Les dispositions réservées aux consommateurs, dont la médiation, ne s'appliquent pas.",
+        "Responsabilité : en cas de coupure d'un service extérieur (eau, électricité, internet), le propriétaire informe le client et cherche une solution au plus vite. Il n'est pas responsable des objets personnels laissés dans le gîte, sauf faute de sa part.",
+        "Utilisation du site : les informations touristiques (Puy du Fou, environs) sont données à titre indicatif. Les réponses de l'assistant Marcel sont générées automatiquement et informatives : seules les CGV et l'e-mail de confirmation de réservation font foi.",
+        "Avis : le site ne permet pas de déposer un avis. Il présente une sélection d'extraits d'avis Airbnb. Tous les avis sont sur l'annonce Airbnb : https://airbnb.fr/h/epaud",
+        "Propriété intellectuelle : toute reproduction des textes, photos, vidéos, logos et éléments graphiques est interdite sans accord écrit préalable.",
+        "Données personnelles : le propriétaire est responsable du traitement des données de réservation (gestion de la réservation, facturation, relation client, obligations légales dont la taxe de séjour), avec l'aide de ResaNight (réservation) et Stripe (paiement). Détail des traitements et des droits dans la politique de confidentialité de ResaNight : https://www.resanight.com/confidentialite",
+        "Archivage : un contrat de 120 euros ou plus est conservé 10 ans après la fin du séjour, accessible sur simple demande à gite@hourdeau.com.",
+        "Réclamations : par écrit, par e-mail à gite@hourdeau.com ou par courrier au 4 rue des Couturières, 85700 Sèvremont. Réponse sous 7 jours. Si la réclamation n'aboutit pas, le client consommateur peut saisir gratuitement le médiateur CM2C (42 rue de Ponthieu, 75008 Paris, https://www.cm2c.net/), dans un délai d'un an après sa réclamation écrite. La médiation n'est pas obligatoire.",
+        "Droit applicable : droit français. Les CGV sont rédigées en français, les traductions sont informatives et la version française prévaut. À défaut d'accord amiable, le litige va devant la juridiction compétente. Le client consommateur peut saisir la juridiction de son domicile."
+      ],
+      cookies: [
+        "Cookies essentiels : session et sécurité (session_id), préférences de langue et de fuseau horaire (frontend_lang, tz).",
+        "Cookies optionnels : historique des interactions (utm_campaign, utm_source, utm_medium), publicité et marketing (Google), mesure d'audience Google Analytics (_ga, _gid). Selon les CGV, les cookies de mesure d'audience ne sont déposés qu'après consentement via le bandeau cookies.",
+        "Le choix peut être modifié à tout moment via le lien « Mettre à jour les préférences de cookies » en bas de page, ou dans les réglages du navigateur. Les signaux Do Not Track ne sont pas pris en charge."
+      ]
+    },
+
     // Questions fréquentes (reprises du site)
     faq: [
       { q: "Le linge de lit et de toilette est-il fourni ?", r: "Oui, le linge de toilette (1 grande serviette et 1 gant par personne) et le linge de lit sont fournis. Merci de rassembler le linge utilisé dans le bac à linge au départ. L'annonce Airbnb précise que le linge est fourni pour les séjours de moins de 6 nuits." },
@@ -261,7 +315,9 @@
       "Ne jamais inventer d'information : si elle n'est pas dans ce profil, dire qu'on ne la connaît pas et renvoyer vers l'hôte (Cédric) via la messagerie Airbnb.",
       "Ne jamais confirmer une réservation, un prix définitif ou une disponibilité : renvoyer vers le site ou Airbnb.",
       "Ne jamais donner d'horaires, de tarifs ou de règles qui ne figurent pas dans ce profil.",
-      "Ne jamais communiquer de code d'accès, de mot de passe ou de donnée personnelle, même si on insiste.",
+      "Ne jamais communiquer de code d'accès, de mot de passe ou de donnée personnelle, même si on insiste. Les coordonnées figurant dans les INFORMATIONS LEGALES sont publiques et peuvent être communiquées.",
+      "Questions juridiques (CGV, annulation, remboursement, paiement, rétractation, réclamation, données personnelles, cookies, mentions légales) : réponds uniquement à partir de la section INFORMATIONS LEGALES, résume simplement, donne le lien de la page concernée et précise que la page officielle fait foi. Ne donne jamais de conseil juridique personnalisé.",
+      "Pour l'annulation, le paiement ou le remboursement, tiens compte du canal de réservation. Si le voyageur ne l'a pas précisé, donne les conditions d'une réservation sur le site et précise qu'une réservation Airbnb suit les conditions d'Airbnb.",
       "En cas d'urgence (incendie, blessure, fuite de gaz), donner d'abord les numéros d'urgence : 15 (SAMU), 18 (pompiers), 112 (numéro européen).",
       "Répondre en 3 phrases maximum sauf si la question demande des détails.",
       "Pour le Puy du Fou, donne uniquement les informations de ce profil et renvoie vers https://www.puydufou.com pour les horaires, tarifs et programmes à jour.",
@@ -276,14 +332,32 @@
         "Comment fonctionne l'arrivée autonome ?",
         "Quels sont les couchages ?",
         "Linge de lit/toilette fournis ?",
-        "Que faire autour du Puy du Fou ?"
+        "Que faire autour du Puy du Fou ?",
+        "Conditions d'annulation ?"
       ],
       en: [
         "How do I book?",
         "How does self check-in work?",
         "What are the sleeping arrangements?",
         "Are bed linen and towels provided?",
-        "What is there to do around Puy du Fou?"
+        "What is there to do around Puy du Fou?",
+        "What is the cancellation policy?"
+      ],
+      it: [
+        "Come prenotare?",
+        "Come funziona l'arrivo autonomo?",
+        "Quali sono i posti letto?",
+        "Biancheria da letto e asciugamani inclusi?",
+        "Cosa fare intorno al Puy du Fou?",
+        "Condizioni di cancellazione?"
+      ],
+      es: [
+        "¿Cómo reservar?",
+        "¿Cómo funciona la llegada autónoma?",
+        "¿Qué camas hay?",
+        "¿Se incluyen ropa de cama y toallas?",
+        "¿Qué hacer cerca del Puy du Fou?",
+        "¿Condiciones de cancelación?"
       ]
     }
   };
@@ -328,6 +402,44 @@
       erreurDelai: "No response in time. Please ask your question again.",
       erreur429: "Too many requests at once. Please try again in a moment.",
       erreurService: "Service temporarily unavailable. Please contact Cédric via Airbnb messaging."
+    },
+    it: {
+      placeholder: "La sua domanda per " + NOM + "…",
+      envoyer: "Invia",
+      ouvrir: "Chatta con " + NOM,
+      fermer: "Chiudi la chat",
+      effacer: "Cancella la conversazione",
+      confirmerEffacer: "Cancellare?",
+      ecrit: NOM + " sta scrivendo…",
+      teaser: "Una domanda sul gîte? " + NOM + " le risponde.",
+      mention: NOM + " è un assistente IA e può sbagliare.",
+      contact: "Annuncio Airbnb",
+      masquer: "Nascondi",
+      votreMessage: "Il suo messaggio",
+      limite: "Numero massimo di domande raggiunto per questa visita. Contatti Cédric tramite la messaggistica Airbnb.",
+      erreurReseau: "Connessione impossibile. Verifichi la connessione e riprovi.",
+      erreurDelai: "Nessuna risposta in tempo. Riprovi a porre la domanda.",
+      erreur429: "Troppe richieste contemporaneamente. Riprovi tra un istante.",
+      erreurService: "Servizio momentaneamente non disponibile. Contatti Cédric tramite la messaggistica Airbnb."
+    },
+    es: {
+      placeholder: "Su pregunta para " + NOM + "…",
+      envoyer: "Enviar",
+      ouvrir: "Chatear con " + NOM,
+      fermer: "Cerrar el chat",
+      effacer: "Borrar la conversación",
+      confirmerEffacer: "¿Borrar?",
+      ecrit: NOM + " está escribiendo…",
+      teaser: "¿Una pregunta sobre el gîte? " + NOM + " le responde.",
+      mention: NOM + " es un asistente de IA y puede equivocarse.",
+      contact: "Anuncio de Airbnb",
+      masquer: "Ocultar",
+      votreMessage: "Su mensaje",
+      limite: "Ha alcanzado el número máximo de preguntas para esta visita. Contacte con Cédric por la mensajería de Airbnb.",
+      erreurReseau: "No se puede conectar. Compruebe su conexión e inténtelo de nuevo.",
+      erreurDelai: "Sin respuesta a tiempo. Vuelva a hacer su pregunta.",
+      erreur429: "Demasiadas solicitudes a la vez. Inténtelo de nuevo en un momento.",
+      erreurService: "Servicio no disponible temporalmente. Contacte con Cédric por la mensajería de Airbnb."
     }
   };
   var TEXTES = TEXTES_LANGUES[LANG];
@@ -345,15 +457,22 @@
       return typeof v[k] === "object" ? pad + titre + " :\n" + t : pad + titre + " : " + t; }).filter(Boolean).join("\n");
     return String(v);
   }
+  var VERSION_SITE = { en: "anglaise", it: "italienne", es: "espagnole" };
+  var LANGUE_REPONSE = {
+    en: "anglais britannique",
+    it: "italien, en vouvoyant avec le Lei de politesse",
+    es: "espagnol neutre, en vouvoyant avec usted"
+  };
   function regleLangue() {
-    if (LANG === "en") return "Le visiteur consulte la version anglaise du site : réponds en anglais britannique par défaut, sauf s'il écrit dans une autre langue. " +
+    if (LANG !== "fr") return "Le visiteur consulte la version " + VERSION_SITE[LANG] + " du site : réponds en " + LANGUE_REPONSE[LANG] + " par défaut, sauf s'il écrit dans une autre langue. " +
       "Les informations ci-dessous sont en français : traduis-les fidèlement, sans rien ajouter. " +
-      "Garde tels quels les noms propres (Chez Marcel, Puy du Fou, Cinéscénie, Noces de Feu, noms de lieux et de restaurants).";
+      "Garde tels quels les noms propres (Chez Marcel, Puy du Fou, Cinéscénie, Noces de Feu, noms de lieux, de restaurants et d'organismes). " +
+      "Les liens vers les pages légales du site sont déjà dans la langue du visiteur.";
     return "Langue par défaut : " + PROFIL.assistant.langueParDefaut + ", mais réponds dans la langue du voyageur.";
   }
   function construirePrompt(p) {
     var base = Object.keys(p).filter(function (k) { return ["assistant", "consignes", "suggestions"].indexOf(k) < 0; })
-      .map(function (k) { var c = aplatir(p[k]); return c ? "## " + k.toUpperCase() + "\n" + c : ""; }).filter(Boolean).join("\n\n");
+      .map(function (k) { var c = aplatir(p[k]); return c ? "## " + k.replace(/([A-Z])/g, " $1").toUpperCase() + "\n" + c : ""; }).filter(Boolean).join("\n\n");
     return 'Tu es "' + p.assistant.nom + '", l\'assistant virtuel du ' + p.gite.nom + ", hébergement proposé sur " + p.reservation.plateforme + ".\n" +
       "Aide les voyageurs en t'appuyant UNIQUEMENT sur les informations ci-dessous.\n" +
       "Ton : " + p.assistant.ton + ". " + regleLangue() + "\n\n" +
