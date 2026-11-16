@@ -126,8 +126,8 @@ Dans les paramètres du site Web, domaine déclaré : `https://gite.hourdeau.com
 |---|---|---|---|
 | Français | `fr_FR` | (aucun) | Oui |
 | Anglais | `en_GB` | `/en/` | Oui |
-| Espagnol | `es_ES` | `/es/` | Interface en français, réponse dans la langue du visiteur |
-| Italien | `it_IT` | `/it/` | Interface en français, réponse dans la langue du visiteur |
+| Espagnol | `es_ES` | `/es/` | Oui |
+| Italien | `it_IT` | `/it/` | Oui |
 
 Méthode de traduction : outil de traduction automatique d'Odoo, puis **relecture humaine** de chaque page. Toute modification d'un contenu français doit être reportée dans les trois autres langues : Odoo ne propage pas les modifications aux traductions existantes.
 
